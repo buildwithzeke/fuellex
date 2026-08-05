@@ -1,0 +1,58 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum FuelType {
+  PMS
+  AGO
+  DPK
+  LPG
+}
+
+model User {
+  id        String       @id @default(uuid())
+  name      String
+  email     String       @unique
+  password  String
+  role      Role         @default(USER)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  reports   FuelReport[]
+}
+
+model FuelStation {
+  id         String       @id @default(uuid())
+  name       String
+  brand      String?
+  address    String
+  state      String
+  city       String
+  latitude   Float
+  longitude  Float
+  isVerified Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  reports    FuelReport[]
+}
+
+model FuelReport {
+  id        String      @id @default(uuid())
+  stationId String
+  station   FuelStation @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fuelType  FuelType
+  price     Float
+  available Boolean     @default(true)
+  createdAt DateTime    @default(now())
+}
